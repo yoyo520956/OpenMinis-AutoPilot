@@ -361,6 +361,7 @@
 		E5P000004 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5P000014 /* DeepLinkRouter.swift */; };
 		E5PPB0001 /* PerfProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5PPB0011 /* PerfProbe.swift */; };
 		E5PPR0001 /* AIChatViewModel+ProgrammaticPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5PPR0011 /* AIChatViewModel+ProgrammaticPrompt.swift */; };
+		E5AP0001 /* AutoPilotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AP0011 /* AutoPilotManager.swift */; };
 		E5PRIV01 /* EnvVarPrivacyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5PRIV11 /* EnvVarPrivacyStore.swift */; };
 		E5PRIV02 /* EnvVarRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5PRIV12 /* EnvVarRedactor.swift */; };
 		E5PV00001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E5PV00002 /* PrivacyInfo.xcprivacy */; };
@@ -1084,6 +1085,7 @@
 		E5P000014 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		E5PPB0011 /* PerfProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfProbe.swift; sourceTree = "<group>"; };
 		E5PPR0011 /* AIChatViewModel+ProgrammaticPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIChatViewModel+ProgrammaticPrompt.swift"; sourceTree = "<group>"; };
+		E5AP0011 /* AutoPilotManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutoPilotManager.swift"; sourceTree = "<group>"; };
 		E5PRIV11 /* EnvVarPrivacyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvVarPrivacyStore.swift; sourceTree = "<group>"; };
 		E5PRIV12 /* EnvVarRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvVarRedactor.swift; sourceTree = "<group>"; };
 		E5PV00002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -2115,6 +2117,7 @@
 				E5VMA0018 /* AIChatViewModel+ToolPreflight.swift */,
 				E5VMB0011 /* AIChatViewModel+Compaction.swift */,
 				E5PPR0011 /* AIChatViewModel+ProgrammaticPrompt.swift */,
+				E5AP0011 /* AutoPilotManager.swift */,
 				E5VMB0012 /* AIChatViewModel+Fallback.swift */,
 				E5VMB0013 /* AIChatViewModel+Misc.swift */,
 				E5VMB0014 /* AIChatViewModel+RequestBudget.swift */,
@@ -2860,6 +2863,7 @@
 				E5VMA0008 /* AIChatViewModel+ToolPreflight.swift in Sources */,
 				E5VMB0001 /* AIChatViewModel+Compaction.swift in Sources */,
 				E5PPR0001 /* AIChatViewModel+ProgrammaticPrompt.swift in Sources */,
+				E5AP0001 /* AutoPilotManager.swift in Sources */,
 				E5AJR0001 /* AgentJobRegistry.swift in Sources */,
 				E5AJR0002 /* HelperRunner.swift in Sources */,
 				E5AJR0003 /* ModelTierResolver.swift in Sources */,

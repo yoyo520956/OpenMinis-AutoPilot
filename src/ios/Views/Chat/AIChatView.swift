@@ -3321,6 +3321,7 @@ struct AIChatView: View {
         let row = HStack(spacing: 12) {
             attachmentMenuButton
             slashMenuButton
+            AutoPilotToggleButton(sessionId: vm.sessionId)
             if vm.editingMessageIndex != nil { editExitButton }
             Spacer()
             // Mutually exclusive with editExitButton: while editing a past
@@ -3340,7 +3341,7 @@ struct AIChatView: View {
     /// leading buttons, the 34pt mic and the 34pt send button, plus the four
     /// 12pt HStack gaps between them. Everything left over is what the
     /// read-aloud capsule may use.
-    private static let readAloudRowFixedWidth: CGFloat = 34 * 4 + 12 * 4
+    private static let readAloudRowFixedWidth: CGFloat = 34 * 5 + 12 * 5
 
     /// Free width below which the toggle drops its text and becomes icon-only.
     ///
@@ -7005,4 +7006,42 @@ final class ComposerActionChannel {
     /// an early arrow/tab key keeps its default text-view behaviour).
     @discardableResult
     func send(_ action: Action) -> Bool { handler?(action) ?? false }
+}
+
+
+/// [AutoPilot] 输入条上的全自动模式开关。
+/// 独立订阅 AutoPilotManager.shared（只局部刷新）；sessionId 由父视图按会话传入。
+struct AutoPilotToggleButton: View {
+    let sessionId: String?
+    @ObservedObject private var ap = AutoPilotManager.shared
+
+    private var enabled: Bool { ap.isEnabled(for: sessionId) }
+
+    var body: some View {
+        Button {
+            ap.setEnabled(!enabled, sessionId: sessionId)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: enabled ? "bolt.circle.fill" : "bolt.circle")
+                    .font(.system(size: 19, weight: .medium))
+                    .foregroundStyle(enabled ? ChatColors.sendButton : ChatColors.secondaryText)
+                    .frame(width: 34, height: 34)
+                    .accessibilityLabel(Text(enabled ? "关闭全自动模式" : "开启全自动模式"))
+                    .background(ChatColors.inputIconBg)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(enabled ? ChatColors.sendButton : ChatColors.inputIconBorder, lineWidth: 0.5))
+                if enabled && ap.round > 0 {
+                    Text("\(ap.round)")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(Capsule().fill(ChatColors.sendButton))
+                        .offset(x: 4, y: -3)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
 }

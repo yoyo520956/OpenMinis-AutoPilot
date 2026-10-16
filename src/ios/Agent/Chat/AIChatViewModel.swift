@@ -898,6 +898,11 @@ final class AIChatViewModel: ObservableObject, SpeechControlling {
                 if !promptQueue.isEmpty && !userDidCancel {
                     startDrainIfIdle(reason: "loop-ended-with-queued-prompts")
                 }
+                // [AutoPilot] 全自动模式：loop 结束后决定是否自动续跑。
+                // 仅在无排队提示时接管（避免与程序化队列竞争同一会话）。
+                if promptQueue.isEmpty && !userDidCancel {
+                    AutoPilotManager.shared.loopDidEnd(vm: self, wasCancelled: userDidCancel)
+                }
                 // [T-ios-ui-frozen-on-tool-while-loop-runs] Force one snapshot
                 // re-apply from the CURRENT in-memory messages at loop end.
                 //
@@ -2495,6 +2500,19 @@ final class AIChatViewModel: ObservableObject, SpeechControlling {
             + "Use `minis-scheduled` for follow-ups and recurring prompts that only need to fire while Minis stays open (it is best effort and dies with the app process). "
             + "For recurring tasks that must fire even after the app is killed, tell the user to set up an automation in Apple Shortcuts — that is the only guaranteed way to trigger periodic execution on iOS. "
             + "(Waiting or polling WITHIN the current turn is different — that is what shell_execute `delay` chains are for, per the shell_execute notes above.)"
+    }
+
+    /// [AutoPilot] 全自动模式状态说明（开启时追加到系统提示末尾）。
+    /// 与 memoryStatusFragment 相同的组装模式：在每个 assemble site 追加。
+    private var autoPilotStatusFragment: String {
+        guard AutoPilotManager.shared.isEnabled(for: sessionId) else { return "" }
+        return "\n\nAutoPilot status: ENABLED for this session. "
+            + "You are in FULL AUTO mode: work autonomously until the task is complete — "
+            + "do not ask the user for confirmation, do not stop mid-task, retry failures yourself, "
+            + "and verify results with tools. When everything is done, end your final reply with "
+            + "a line containing exactly \(AutoPilotManager.doneToken). "
+            + "Only if you are truly blocked pending user input (secrets, destructive choices), "
+            + "end with a line containing \(AutoPilotManager.blockedToken) plus one line explaining why."
     }
 
     /// [T-memory-toggle-gates-injection-and-tools-ios]
@@ -5954,6 +5972,7 @@ final class AIChatViewModel: ObservableObject, SpeechControlling {
         // Authoritative memory-status footer (overrides any earlier
         // baseSystemPrompt mentions when memory is disabled).
         userSystemPrompt += memoryStatusFragment
+        userSystemPrompt += autoPilotStatusFragment
 
         let promptBuildMs = (CFAbsoluteTimeGetCurrent() - loopSetupStart) * 1000
         logger.info("⏱️ [runAgentLoop] prompt build elapsed=\(String(format: "%.1f", promptBuildMs))ms history=\(self.agentHistory.count)")
@@ -6667,6 +6686,7 @@ final class AIChatViewModel: ObservableObject, SpeechControlling {
                     }
                 }
                 userSystemPrompt += memoryStatusFragment
+                userSystemPrompt += autoPilotStatusFragment
                 fallbackTrigger += 1
                 if !fallbackReasons.isEmpty {
                     // Resync the assistant message index by its stable id before

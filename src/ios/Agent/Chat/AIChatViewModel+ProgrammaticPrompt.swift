@@ -35,12 +35,15 @@ enum ProgrammaticPromptOrigin: Equatable {
     case shortcut
     /// An `AgentJobRegistry` job (scheduled trigger, helper completion, …).
     case job(jobId: String)
+    /// AutoPilot 全自动模式的自动续跑注入。
+    case autopilot
 
     var logLabel: String {
         switch self {
         case .cli: return "cli"
         case .shortcut: return "shortcut"
         case .job(let id): return "job:\(id.prefix(8))"
+        case .autopilot: return "autopilot"
         }
     }
 }
