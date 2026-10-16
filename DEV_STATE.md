@@ -1,6 +1,6 @@
 # OpenMinis AutoPilot 开发状态（自动接续用）
 
-更新时间：2026-10-17 06:05（第 2 轮末）
+更新时间：2026-10-17 06:50（第 3 轮末）
 项目根：/var/minis/workspace/openminis
 
 ## 目标
@@ -24,8 +24,8 @@
    - **下一轮：查构建结果**——`GET /repos/yoyo520956/OpenMinis-AutoPilot/actions/runs?per_page=3` → running 则继续等/看 job steps 明细；success 则下载 IPA artifact（名 `Minis-IPA`）；failure 则 GET `/actions/runs/{id}/jobs` 看 steps + 日志定位迭代修错
    - 备注：fork 的 push 曾额外触发一个 run（已取消保留一个）；workflow 已 enable（将来若 disabled：`PUT /actions/workflows/build-ios.yml/enable`）
 2. 编译错误迭代（Swift 6 严格模式；重点 AutoPilotManager/AIChatView）
-3. 技能包（bundled）：autopilot-workflow / code-review / git-flow
-4. 开源材料：三语 README（中/英/繁）+ CHANGELOG + Release notes
+3. [✓第3轮] 技能包已内嵌：autopilot-workflow / code-review / git-workflow（SkillStore.swift 内嵌字符串+3 处安装调用；a49f735）
+4. [✓第3轮] 门面材料：三语 README（头部 中/英/繁 + 上游全文折叠）+ CHANGELOG（三语更新公告）+ Issue 提案稿（/tmp/issue_draft.md——构建绿后提交到上游）
 5. 下载 IPA → 发用户（/var/minis/attachments/）
 
 ## 同步策略（上游合作）★ 重要
