@@ -60,13 +60,13 @@ jobs:
       - name: "Native deps 5/5: rclone"
         run: bash deps/build_rclone_ios.sh
 
-      - name: Build app (ad-hoc pre-signed — improves re-sign reliability)
+      - name: Build app (unsigned — SDK 26.5 disallows ad-hoc signing)
         run: |
           set -o pipefail
           xcodebuild -project src/ios/Minis.xcodeproj -scheme Minis \
             -sdk iphoneos -configuration Release \
             -derivedDataPath build \
-            CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             build
 
       - name: Package unsigned IPA
