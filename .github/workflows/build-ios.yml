@@ -19,6 +19,18 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Pick older Xcode if available (sideload-friendlier binaries)
+        run: |
+          ls /Applications | grep -i xcode || true
+          for v in 16.4 16.3 16.2 16.1 16.0; do
+            if [ -d "/Applications/Xcode_${v}.app" ]; then
+              sudo xcode-select -s "/Applications/Xcode_${v}.app"
+              echo "Selected Xcode ${v}"
+              break
+            fi
+          done
+          xcodebuild -version
+
       - name: Show toolchain versions
         run: |
           xcodebuild -version
@@ -69,18 +81,31 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             build
 
-      - name: Package unsigned IPA
+      - name: Package IPA (full + lite)
         run: |
           APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
           echo "APP=$APP"
           mkdir -p Payload
           cp -r "$APP" Payload/
-          zip -qry Minis-AutoPilot-unsigned.ipa Payload
-          ls -la Minis-AutoPilot-unsigned.ipa
+          zip -qry Minis-AutoPilot-full.ipa Payload
+          rm -rf Payload
+          mkdir -p Payload
+          cp -r "$APP" Payload/
+          rm -rf Payload/*.app/PlugIns
+          zip -qry Minis-AutoPilot-lite.ipa Payload
+          rm -rf Payload
+          ls -la *.ipa
 
-      - name: Upload IPA artifact
+      - name: Upload full IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Minis-IPA
-          path: Minis-AutoPilot-unsigned.ipa
+          name: Minis-IPA-full
+          path: Minis-AutoPilot-full.ipa
+          if-no-files-found: error
+
+      - name: Upload lite IPA (no extensions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minis-IPA-lite
+          path: Minis-AutoPilot-lite.ipa
           if-no-files-found: error
