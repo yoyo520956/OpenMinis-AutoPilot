@@ -23,6 +23,8 @@
 
 本仓库的 [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) 提供**未签名 IPA**，使用你自己的签名工具（AltStore / SideStore / Sideloadly 等）重签安装即可。
 
+> 本构建使用独立包名（`com.youlong.minisautopilot`），**可与官方版 Minis 共存安装、同时使用**。
+
 ### 🔨 构建
 
 见 [BUILDING.md](BUILDING.md)（首次构建需要从源码编译 iSH 内核 / FFmpeg / LAME / rclone，约 30-60 分钟）。本仓库内置 GitHub Actions 自动构建：`.github/workflows/build-ios.yml`。
@@ -50,6 +52,8 @@ Flip the "⚡ Full-Auto" toggle in the composer, and:
 
 Grab the **unsigned IPA** from [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) and re-sign it with your own tooling (AltStore / SideStore / Sideloadly, etc.).
 
+> This build uses an independent bundle id (`com.youlong.minisautopilot`) — it **can be installed and used alongside the official Minis**.
+
 ### 🔨 Build
 
 See [BUILDING.md](BUILDING.md) (the first build compiles iSH kernel / FFmpeg / LAME / rclone from source, ~30-60 min). CI is built in: `.github/workflows/build-ios.yml`.
@@ -76,6 +80,8 @@ GPL-3.0 (same as upstream). This project is a derivative work of OpenMinis — a
 ### 📦 安裝
 
 本倉庫的 [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) 提供**未簽名 IPA**，使用你自己的簽名工具（AltStore / SideStore / Sideloadly 等）重簽安裝即可。
+
+> 本建置使用獨立套件名（`com.youlong.minisautopilot`），**可與官方版 Minis 共存安裝、同時使用**。
 
 ### 🔨 建置
 
