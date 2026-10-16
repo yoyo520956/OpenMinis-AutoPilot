@@ -285,6 +285,93 @@ final class SkillStore: ObservableObject {
     // MARK: - Bundled Skills
 
     private static let skillCreatorVersion = "2.1.0"
+    private static let autoPilotSkillContent = """
+---
+name: autopilot-workflow
+version: 1.0.0
+description: 全自动模式（Full-Auto）的最佳工作范式。当会话处于全自动模式（系统提示含 "AutoPilot status: ENABLED"）时使用：目标分解、进度自检、失败自愈、完成度汇报的标准流程。
+---
+
+# 全自动工作流
+
+当你处于「全自动模式」时，按以下范式工作，不要等待人类插话：
+
+## 每轮工作循环
+1. **回顾**：目标 → 已完成 → 还差什么。读工作区文件与产物核对，不要凭记忆。
+2. **行动**：执行本轮最有价值的 1-3 件事，用工具真实执行。
+3. **验证**：用可观测的方式验证结果（跑测试 / 检查文件 / 读输出），不要假设成功。
+4. **记录**：把关键状态写入进度文件（如 WORKLOG.md），供后续轮次与用户查看。
+
+## 失败处理
+- 同一操作失败两次 → 换方法（不同工具 / 不同路径 / 先诊断再动手）。
+- 三次仍失败 → 停掉该分支，转向其他可行部分，并在总结中标注阻塞项。
+
+## 轮次纪律
+- 不输出"我将要…"的宣言，直接做。
+- 不重复已完成的工作：先检查现状再动手。
+- 汇报简洁：本轮做了什么 + 下轮计划，一两句即可。
+
+## 结束条件
+- 全部完成 → 最终回复末尾另起一行输出 ▣AUTOPILOT:DONE▣，并附简短成果报告。
+- 必须用户决策（密钥 / 不可逆操作 / 方向选择）→ 输出 ▣AUTOPILOT:BLOCKED▣ + 一行原因。
+- 预算将尽 → 固化成果（保存文件 / 提交），输出完成度报告。
+"""
+
+    private static let codeReviewSkillContent = """
+---
+name: code-review
+version: 1.0.0
+description: 代码审查技能。审查代码缺陷、潜在回归、安全隐患，输出分级问题清单与具体修复建议。用户要求"审查代码 / 检查 bug / 看看这段代码 / review"时使用。
+---
+
+# 代码审查
+
+## 流程
+1. 明确范围：要审查哪些文件 / 哪些变更（git diff 或指定文件）。
+2. 通读一遍理解意图，再做批判性检查（先懂它想干什么，再挑毛病）。
+3. 分级输出：🔴 必须修复 / 🟡 建议改进 / 🔵 可选优化。
+
+## 检查清单
+- 正确性：边界条件、空值、错误路径、并发竞态。
+- 安全：注入、密钥泄漏、越权、不安全反序列化。
+- 回归：改动的调用方是否同步更新。
+- 资源：泄漏、未释放、超大内存 / 文件。
+- 可维护性：命名、重复、过度复杂。
+
+## 输出格式
+每个问题：`文件:行号` → 问题描述 → 为什么是问题 → 具体修法（给出代码）。
+最后给一句总体结论（可合并 / 需修改 / 需重做）。
+拒绝泛泛而谈：每个发现都要能落到具体一行。
+"""
+
+    private static let gitWorkflowSkillContent = """
+---
+name: git-workflow
+version: 1.0.0
+description: Git 工作流技能。规范完成提交、分支、推送、PR 等操作；用户要求"提交 / 推送 / 开分支 / 合并"，或全自动模式下需要固化成果时使用。
+---
+
+# Git 工作流
+
+## 提交纪律
+- 提交前先 `git status` 与 `git diff --stat` 审视改动。
+- 一个提交做一件事；message 格式：`type(scope): summary`（feat / fix / docs / ci / refactor / chore）。
+- 不提交：密钥、大二进制、构建产物（先查 .gitignore）。
+
+## 推送前检查
+- 先拉取远端最新，避免 non-fast-forward。
+- push 失败重试 2-3 次；持续失败则诊断（网络 / 权限 / 分支保护）。
+- 网络不稳时：`git config http.version HTTP/1.1` 与 `http.postBuffer` 调大，是最有效的组合拳。
+
+## 分支与合并
+- 功能开发走分支：`feature/<name>`；完成后合并或开 PR。
+- 冲突处理：先理解两边意图再解决，不要盲目取一边。
+
+## 安全
+- 永不 force push 共享分支。
+- 含凭据的 URL 只用于单次命令，不写入 remote 配置。
+"""
+
     private static let skillCreatorContent = """
 ---
 name: skill-creator
@@ -387,6 +474,9 @@ Do not create extraneous files: README.md, INSTALLATION_GUIDE.md, CHANGELOG.md, 
             guard existing.version < Self.skillCreatorVersion else { return }
         }
         _ = try? importSkill(content: Self.skillCreatorContent, source: .bundled)
+        _ = try? importSkill(content: Self.autoPilotSkillContent, source: .bundled)
+        _ = try? importSkill(content: Self.codeReviewSkillContent, source: .bundled)
+        _ = try? importSkill(content: Self.gitWorkflowSkillContent, source: .bundled)
     }
 
     // MARK: - One-time Migration: re-sync skills with bundled files
