@@ -25,7 +25,7 @@ jobs:
           swift --version
 
       - name: Install Homebrew dependencies
-        run: brew install ninja llvm libarchive pkg-config go
+        run: brew install ninja llvm libarchive pkg-config go lld
 
       - name: Install meson
         run: brew install meson
@@ -43,6 +43,13 @@ jobs:
 
       - name: "Native deps 2/5: FFmpeg"
         run: bash deps/build_ffmpeg.sh
+
+      - name: Wire lld into the llvm toolchain (iSH VDSO needs -fuse-ld=lld)
+        run: |
+          LLD="$(brew --prefix lld)"
+          LLVM="$(brew --prefix llvm)"
+          ln -sf "$LLD/bin/ld.lld" "$LLVM/bin/ld.lld"
+          echo "$LLD/bin" >> "$GITHUB_PATH"
 
       - name: "Native deps 3/5: iSH kernel"
         run: bash deps/build_ish.sh

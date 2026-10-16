@@ -28,6 +28,12 @@
 4. 开源材料：三语 README（中/英/繁）+ CHANGELOG + Release notes
 5. 下载 IPA → 发用户（/var/minis/attachments/）
 
+## 同步策略（上游合作）★ 重要
+- 上游 `CONTRIBUTING.md` 明确「**不接受 Pull Request**」——镜像仓库模式：私有树开发，发版才同步到公开镜像；PR 无处落地（官方原话会关闭 PR 并指向文档）
+- **正门 = Feature Request Issue**（官方原话意："clear report worth more than a patch"）→ 上游认可会在私有树实现，随发版出现在原版
+- **计划**：构建通过后，提交高质量英文 Issue（全自动模式提案 + 附 fork 参考实现链接 https://github.com/yoyo520956/OpenMinis-AutoPilot）
+- 反方向：上游更新可随时 Sync fork（保持不落伍）
+
 ## 关键坐标
 - 按钮：Views/Chat/AIChatView.swift 尾部 `struct AutoPilotToggleButton`；使用处 `inputBottomRow`
 - 引擎：Agent/Chat/AutoPilotManager.swift；钩子搜 "AutoPilot"（AIChatViewModel.swift ~901 行）
