@@ -1162,7 +1162,12 @@ struct MinisApp: App {
     private static func migrateSharedDirToAppGroup() {
         let fm = FileManager.default
         let library = fm.urls(for: .libraryDirectory, in: .userDomainMask).first!
-        let container = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.youlong.minisautopilot")!
+        // [sideload-safe] App Group entitlement may be absent in re-signed sideload
+        // builds — skip this one-time best-effort migration instead of crashing.
+        guard let container = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.youlong.minisautopilot") else {
+            lifecycleLog.warning("[Migration] App Group container unavailable — skipping shared-dir migration")
+            return
+        }
 
         let migrations: [(source: URL, dest: URL, label: String)] = [
             // Legacy Library/MinisChat/shared → new shared
