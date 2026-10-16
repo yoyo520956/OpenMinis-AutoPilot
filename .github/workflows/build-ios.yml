@@ -28,7 +28,7 @@ jobs:
         run: brew install ninja llvm libarchive pkg-config go
 
       - name: Install meson
-        run: pip3 install meson
+        run: brew install meson
 
       - name: Download Metal toolchain (for FFmpeg yadif_videotoolbox)
         run: xcodebuild -downloadComponent MetalToolchain

@@ -18,10 +18,11 @@
 - [x] 本地 git commit 2aaf4c3（7 文件 +333 行）
 
 ## 进行中 / 待办
-1. **[第 2 轮末正在进行] 建公开仓库 + 推送 + 触发首构建**
-   - 仓库：`yoyo520956/OpenMinis-AutoPilot`（PUBLIC——Actions 免费无限）
-   - push 注意：http.version=HTTP/1.1 + postBuffer（防 SSL EOF）；直连或 gh-proxy
-   - 首构建 30-60 分钟 → 查 runs → 看日志迭代修错
+1. **[已完成 ✓] 公开仓库 + 首构建**
+   - `yoyo520956/OpenMinis-AutoPilot`（PUBLIC fork，parent=OpenMinis/OpenMinis，URL: github.com/yoyo520956/OpenMinis-AutoPilot）
+   - 已推送 ed12721；首构建 run `38965831796` in_progress（2026-10-16 20:56Z 起，预计 30-60 分钟）
+   - **下一轮：查构建结果**——`GET /repos/yoyo520956/OpenMinis-AutoPilot/actions/runs?per_page=3` → running 则继续等/看 job steps 明细；success 则下载 IPA artifact（名 `Minis-IPA`）；failure 则 GET `/actions/runs/{id}/jobs` 看 steps + 日志定位迭代修错
+   - 备注：fork 的 push 曾额外触发一个 run（已取消保留一个）；workflow 已 enable（将来若 disabled：`PUT /actions/workflows/build-ios.yml/enable`）
 2. 编译错误迭代（Swift 6 严格模式；重点 AutoPilotManager/AIChatView）
 3. 技能包（bundled）：autopilot-workflow / code-review / git-flow
 4. 开源材料：三语 README（中/英/繁）+ CHANGELOG + Release notes
