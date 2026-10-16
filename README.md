@@ -1,3 +1,99 @@
+# OpenMinis-AutoPilot 🚀
+
+> **Codex-style Full-Auto mode for OpenMinis** — let your on-device AI agent work autonomously until the task is done.
+>
+> 🌏 简体中文 · English · 繁體中文 — 见下 / below / 見下
+
+---
+
+## 简体中文
+
+**OpenMinis-AutoPilot** 是基于开源项目 [OpenMinis](https://github.com/OpenMinis/OpenMinis)（The AI Agent app across platforms）的增强版本，新增 **全自动模式（Full-Auto）**：像 OpenAI Codex 一样，让 AI 智能体**连续自主工作**——读代码、改代码、跑命令、看报错、自我修复——**直到任务完成，无需人类逐步干预**。
+
+### ✨ 全自动模式是什么
+
+开启输入栏的「⚡ 全自动」开关后：
+
+- AI 每完成一轮工作，**自动检查目标完成度**并继续推进
+- 遇到错误**自行排查修复**，不打断你
+- 任务完成、或确实需要你决策（如缺少只有你持有的密钥）时**自动停下并汇报**
+- 安全护栏：**20 轮预算** · 循环检测 · **随时手动停止**
+
+### 📦 安装
+
+本仓库的 [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) 提供**未签名 IPA**，使用你自己的签名工具（AltStore / SideStore / Sideloadly 等）重签安装即可。
+
+### 🔨 构建
+
+见 [BUILDING.md](BUILDING.md)（首次构建需要从源码编译 iSH 内核 / FFmpeg / LAME / rclone，约 30-60 分钟）。本仓库内置 GitHub Actions 自动构建：`.github/workflows/build-ios.yml`。
+
+### ⚖️ 许可
+
+GPL-3.0（与上游一致）。本项目是 OpenMinis 的衍生作品，感谢 [OpenMinis 团队](https://github.com/OpenMinis/OpenMinis)的开源工作。
+
+---
+
+## English
+
+**OpenMinis-AutoPilot** is an enhanced build of the open-source project [OpenMinis](https://github.com/OpenMinis/OpenMinis) — *The AI Agent app across platforms* — adding a **Codex-style Full-Auto mode**: the on-device AI agent keeps working **autonomously** — reading code, editing files, running commands, inspecting errors, fixing itself — **until the task is done, with no step-by-step human intervention**.
+
+### ✨ What is Full-Auto mode
+
+Flip the "⚡ Full-Auto" toggle in the composer, and:
+
+- After each round, the agent **checks goal progress** and continues automatically
+- Failures are **self-diagnosed and repaired** without interrupting you
+- Stops and reports when the task is **done** — or when it is genuinely **blocked** (e.g. credentials only you hold)
+- Guardrails: **20-round budget** · loop detection · **instant manual stop**
+
+### 📦 Install
+
+Grab the **unsigned IPA** from [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) and re-sign it with your own tooling (AltStore / SideStore / Sideloadly, etc.).
+
+### 🔨 Build
+
+See [BUILDING.md](BUILDING.md) (the first build compiles iSH kernel / FFmpeg / LAME / rclone from source, ~30-60 min). CI is built in: `.github/workflows/build-ios.yml`.
+
+### ⚖️ License
+
+GPL-3.0 (same as upstream). This project is a derivative work of OpenMinis — all credit to the [OpenMinis team](https://github.com/OpenMinis/OpenMinis).
+
+---
+
+## 繁體中文
+
+**OpenMinis-AutoPilot** 是開源專案 [OpenMinis](https://github.com/OpenMinis/OpenMinis)（The AI Agent app across platforms）的增強版本，新增 **全自動模式（Full-Auto）**：像 OpenAI Codex 一樣，讓 AI 代理**連續自主工作**——讀程式碼、修改檔案、執行指令、檢視錯誤、自我修復——**直到任務完成，無需人類逐步介入**。
+
+### ✨ 全自動模式是什麼
+
+開啟輸入欄的「⚡ 全自動」開關後：
+
+- AI 每完成一輪工作，**自動檢查目標完成度**並繼續推進
+- 遇到錯誤**自行排查修復**，不打斷你
+- 任務完成、或確實需要你決策（如缺少只有你持有的金鑰）時**自動停下並回報**
+- 安全護欄：**20 輪預算** · 迴圈偵測 · **隨時手動停止**
+
+### 📦 安裝
+
+本倉庫的 [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) 提供**未簽名 IPA**，使用你自己的簽名工具（AltStore / SideStore / Sideloadly 等）重簽安裝即可。
+
+### 🔨 建置
+
+見 [BUILDING.md](BUILDING.md)（首次建置需從原始碼編譯 iSH 核心 / FFmpeg / LAME / rclone，約 30-60 分鐘）。本倉庫內建 GitHub Actions 自動建置：`.github/workflows/build-ios.yml`。
+
+### ⚖️ 授權
+
+GPL-3.0（與上游一致）。本專案是 OpenMinis 的衍生作品，感謝 [OpenMinis 團隊](https://github.com/OpenMinis/OpenMinis)的開源工作。
+
+---
+
+### 📖 Upstream README (OpenMinis)
+
+This repository is a derivative of the open-source project **OpenMinis**. The full upstream README is preserved below.
+
+<details>
+<summary>📖 <b>OpenMinis — upstream README (click to expand)</b></summary>
+
 # OpenMinis
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -220,3 +316,5 @@ accept pull requests** — there is nowhere for them to land. Issues are the way
 to shape the product, and [AwesomeMinis](https://github.com/OpenMinis/AwesomeMinis)
 and [MinisSkills](https://github.com/OpenMinis/MinisSkills) both do take
 contributions. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+</details>
