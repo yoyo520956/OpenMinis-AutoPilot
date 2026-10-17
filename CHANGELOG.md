@@ -4,6 +4,28 @@ All notable changes to **OpenMinis-AutoPilot** are documented here — in three 
 
 ---
 
+## v0.1.3 — 2026-10-17
+
+### 🇨🇳 简体中文
+
+- ⚡ **全自动模式预算增强**：默认轮次 20 → **100 轮**（面向大任务：可覆盖「从零开发一个完整 App」的全流程，不再中途预算耗尽）
+- 🎯 **支持自定义轮数**：在消息里说「给 N 轮」即可（钳制 5~500），全自动引擎自动采用
+- 🏷️ 显示名简化：**Minis**（主屏名称与官方版同名；包名不同 `com.youlong.minisautopilot`，两者仍可共存、互不覆盖）
+
+### 🇬🇧 English
+
+- ⚡ **AutoPilot budget boost**: default rounds 20 → **100** (large-task oriented: covers developing a complete app from scratch without hitting the budget mid-way)
+- 🎯 **User-specified rounds**: say "give it N rounds" in a message (clamped 5–500) and the engine picks it up automatically
+- 🏷️ Display name simplified to **Minis** (same name on the home screen as the official app; bundle id differs — `com.youlong.minisautopilot` — so both can still be installed side by side)
+
+### 🇭🇰 繁體中文
+
+- ⚡ **全自動模式預算增強**：預設輪次 20 → **100 輪**（面向大任務：可覆蓋「從零開發一個完整 App」全流程）
+- 🎯 **支援自訂輪數**：在訊息裡說「給 N 輪」即可（鉗制 5~500）
+- 🏷️ 顯示名簡化為 **Minis**（主畫面名稱與官方版相同；套件名不同 `com.youlong.minisautopilot`，兩者仍可共存）
+
+---
+
 ## v0.1.2 — 2026-10-17
 
 ### 🇨🇳 简体中文

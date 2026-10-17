@@ -7,7 +7,7 @@
 		<string>com.youlong.minisautopilot.liveactivity-refresh</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>Minis AutoPilot</string>
+	<string>Minis</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
