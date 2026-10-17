@@ -337,8 +337,10 @@ final class AutoPilotManager: ObservableObject {
         if reviewerVM != nil, reviewerSessionId != nil { return true }
         guard let workerSession = await ChatStore.shared.getSession(wid) else { return false }
 
-        // Same model: inherit the worker's modelId and model binding
-        let extras = await ChatStore.shared.getSessionExtras(wid)
+        // Same model: inherit the worker's modelId — that alone pins the same
+        // model. (Exact provider-level binding replication would need a
+        // SessionModelSource struct; the DB stores an encoded JSON string,
+        // so the reviewer just uses the default primary source.)
         let session = await ChatStore.shared.createSession(
             modelId: workerSession.modelId,
             title: "🔍 AutoPilot Reviewer",
