@@ -4,6 +4,31 @@ All notable changes to **OpenMinis-AutoPilot** are documented here — in three 
 
 ---
 
+## v0.1.2 — 2026-10-17
+
+### 🇨🇳 简体中文
+
+- 🛠️ **修复：自签/侧载环境下「打开即闪退」**——启动路径对 App Group 共享目录的强制解包，在签名证书不含该权限时返回 nil 直接崩溃；现改为优雅降级（无权限时自动使用 App 本地目录，功能不受影响）
+- 🛡️ 同类隐患 2 处一并修复（数据目录 / 配置目录 fallback）
+- 📦 构建管线双产物：完整版（full）+ 精简版（lite，剥离扩展），按需选用
+- 🆔 包名独立：`com.youlong.minisautopilot`（显示名 Minis AutoPilot，可与官方版共存）
+
+### 🇬🇧 English
+
+- 🛠️ **Fixed the instant-launch crash on re-signed / sideloaded builds** — the launch path force-unwrapped the App Group container, which returns nil when the signing certificate lacks the entitlement; it now degrades gracefully to an app-local directory with no loss of functionality
+- 🛡️ Two more instances of the same class fixed (data / config roots now fall back too)
+- 📦 Build pipeline now produces both `full` and `lite` (extension-stripped) IPAs
+- 🆔 Standalone bundle id: `com.youlong.minisautopilot` (display name "Minis AutoPilot", coexists with the official app)
+
+### 🇹🇼 繁體中文
+
+- 🛠️ **修復：自簽/側載環境下「開啟即閃退」**——啟動路徑對 App Group 共享目錄的強制解包，在簽名憑證不含該權限時傳回 nil 直接崩潰；現改為優雅降級（無權限時自動使用 App 本地目錄，功能不受影響）
+- 🛡️ 同類隱患 2 處一併修復（資料目錄 / 設定目錄 fallback）
+- 📦 建置管線雙產物：完整版（full）+ 精簡版（lite，剝離擴充功能）
+- 🆔 套件名稱獨立：`com.youlong.minisautopilot`（顯示名 Minis AutoPilot，可與官方版共存）
+
+---
+
 ## v0.1.0 — 2026-10-17
 
 ### 🇨🇳 简体中文
