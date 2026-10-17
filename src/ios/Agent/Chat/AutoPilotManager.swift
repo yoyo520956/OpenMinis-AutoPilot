@@ -840,7 +840,7 @@ final class AutoPilotManager: ObservableObject {
     }
 
     /// v3: parse a ▣PARALLEL:[{...}]▣ request (returns nil when malformed → the marker is ignored).
-    static func parseParallelJobs(_ raw: String) -> [ParallelJob]? {
+    private static func parseParallelJobs(_ raw: String) -> [ParallelJob]? {
         guard let data = raw.data(using: .utf8),
               let arr = (try? JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])) as? [Any] else { return nil }
         var jobs: [ParallelJob] = []
