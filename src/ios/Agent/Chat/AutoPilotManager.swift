@@ -19,7 +19,7 @@
 //
 //  The reviewer session is a hidden child session with parentSessionId (reusing the existing
 //  delegate_task child-session mechanism): it does not appear in the home list and is reachable from
-//  the parent session for audit. Same model (inherits the worker's modelId and model binding),
+//  the parent session for audit. Same model (inherits the worker's modelId),
 //  with long-term memory disabled. Its context contains only "requirements + checklist + worker
 //  output + verdict history", so it is not led along by the worker's reasoning.
 //
@@ -349,11 +349,6 @@ final class AutoPilotManager: ObservableObject {
             parentToolUseId: nil
         )
         reviewerSessionId = session.id
-        if let binding = extras.modelBinding, !binding.isEmpty {
-            ProviderConfigStore.shared.setBinding(
-                SessionModelBinding(sessionId: session.id, primarySource: binding),
-                for: session.id)
-        }
         let (child, _) = ViewModelCache.shared.getOrCreate(for: session.id, kind: .child)
         await child.loadSession()
         child.memoryEnabled = false // no memory reads/writes: no pollution, consistent prompts and tool list
