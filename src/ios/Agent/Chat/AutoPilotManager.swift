@@ -13,7 +13,8 @@
 //  2. 注入文案内置标记协议（独特 token，误报率极低）：
 //       ▣AUTOPILOT:DONE▣     — 任务全部完成
 //       ▣AUTOPILOT:BLOCKED▣  — 必须用户决策（附原因）
-//  3. 预算（默认 20 轮）耗尽时注入一次"收尾提示"，让模型固化成果。
+//  3. 预算（默认 100 轮，面向大任务：可覆盖"从零开发一个完整 App"全流程）耗尽时，
+//     注入一次"收尾提示"，让模型固化成果。用户也可在消息里指定轮数（如"给 50 轮"，钳制 5~500）。
 //  4. 用户手动停止（cancel）不重启。
 //
 
@@ -30,7 +31,7 @@ final class AutoPilotManager: ObservableObject {
 
     @Published private(set) var isActive = false
     @Published private(set) var round = 0
-    @Published private(set) var maxRounds = 20
+    @Published private(set) var maxRounds = 100
     @Published private(set) var statusText = ""
     private(set) var activeSessionId: String?
 
@@ -58,6 +59,15 @@ final class AutoPilotManager: ObservableObject {
         } else {
             stop(reason: "user_toggled_off")
         }
+    }
+
+    /// 手动 / 编程设置轮次预算（钳制到 5~500）。
+    func setMaxRounds(_ n: Int) {
+        let clamped = min(max(n, 5), 500)
+        if clamped != maxRounds {
+            logger.info("[AutoPilot] maxRounds \(maxRounds) -> \(clamped)")
+        }
+        maxRounds = clamped
     }
 
     func stop(reason: String) {
@@ -98,6 +108,13 @@ final class AutoPilotManager: ObservableObject {
             return
         }
 
+        // 1.5) 首个自动轮：从近期消息解析用户指定的预算（如"给 60 轮"）
+        if round == 0 {
+            if let n = Self.parseRounds(text: Self.recentText(vm: vm)) {
+                setMaxRounds(n)
+            }
+        }
+
         // 2) 预算检查
         if round >= maxRounds {
             if !finalizeInjected {
@@ -136,6 +153,17 @@ final class AutoPilotManager: ObservableObject {
     """
 
     // MARK: - 工具
+
+    /// 从文本解析「N 轮 / N 轮」预算（如"给 60 轮"），钳制 5~500。
+    static func parseRounds(text: String) -> Int? {
+        guard let r = text.range(of: "轮") else { return nil }
+        var digits = ""
+        for ch in text[text.index(before: r.lowerBound) ..< r.lowerBound].reversed() {
+            if ch.isNumber { digits = String(ch) + digits } else { break }
+        }
+        guard let n = Int(digits), n > 0 else { return nil }
+        return min(max(n, 5), 500)
+    }
 
     /// 最近 5 条消息的合并文本（宽松标记检测）。
     private static func recentText(vm: AIChatViewModel) -> String {
