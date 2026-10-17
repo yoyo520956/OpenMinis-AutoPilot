@@ -23,6 +23,8 @@
 
 本仓库的 [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) 提供**未签名 IPA**，使用你自己的签名工具（AltStore / SideStore / Sideloadly 等）重签安装即可。
 
+> 🛠️ **最新 v0.1.2：已修复自签/侧载环境下「打开即闪退」**。提供两个版本：**完整版（full）** 与 **精简版（lite，剥离扩展，对签名工具兼容性更好）**。中文安装指引见 [docs/INSTALL-zh.md](docs/INSTALL-zh.md)。
+>
 > 本构建使用独立包名（`com.youlong.minisautopilot`），**可与官方版 Minis 共存安装、同时使用**。
 
 ### 🔨 构建
@@ -81,6 +83,8 @@ GPL-3.0 (same as upstream). This project is a derivative work of OpenMinis — a
 
 本倉庫的 [Releases](https://github.com/yoyo520956/OpenMinis-AutoPilot/releases) 提供**未簽名 IPA**，使用你自己的簽名工具（AltStore / SideStore / Sideloadly 等）重簽安裝即可。
 
+> 🛠️ **最新 v0.1.2：已修復自簽/側載環境下「開啟即閃退」**。提供兩個版本：**完整版（full）** 與 **精簡版（lite，剝離擴充功能，對簽名工具相容性更好）**。
+>
 > 本建置使用獨立套件名（`com.youlong.minisautopilot`），**可與官方版 Minis 共存安裝、同時使用**。
 
 ### 🔨 建置
