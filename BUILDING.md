@@ -295,3 +295,23 @@ Minis is **GPLv3** because it links iSH (GPLv3) and PRoot (GPLv2). If you
 change how the native dependencies are built, keep FFmpeg on its LGPL
 configuration and preserve the vendored `LICENSE` files. See
 [LICENSE](LICENSE) and [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
+---
+
+## Re-signing with your own certificate (optional)
+
+A ready-made re-sign pipeline is included in this repo:
+
+| File | Purpose |
+|---|---|
+| `tools/sign-ipa.sh` | macOS re-sign script — strips extensions, rewrites the bundle id to match the provisioning profile, builds a compatible entitlements plist, signs inside-out (Mach-O → frameworks → app), and repacks the IPA |
+| `.github/workflows/sign-ipa.yml` | Manual workflow — fetches the latest unsigned build artifact, imports the certificate from repository secrets, re-signs, and uploads the signed IPA as `Minis-IPA-signed` |
+| `tools/upload_secrets.py` | One-liner to upload the signing certificate into GitHub Actions secrets (libsodium sealed box) |
+
+**Required secrets** (Settings → Secrets and variables → Actions):
+
+- `SIGNING_P12_BASE64` — base64 of the `.p12` certificate
+- `SIGNING_P12_PASSWORD` — the `.p12` password
+- `SIGNING_PROFILE_BASE64` — base64 of the `.mobileprovision`
+
+Then: Actions → **Re-sign IPA** → Run workflow. The signed IPA installs directly on the provisioned device(s) (remember to trust the certificate after installation).
