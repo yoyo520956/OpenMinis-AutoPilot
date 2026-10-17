@@ -52,6 +52,16 @@ jobs:
           if [ -z "${PROFILE_B64:-}" ]; then echo "✗ SIGNING_PROFILE_BASE64 secret is not configured"; exit 1; fi
           printf '%s\n' "$P12_B64" | openssl base64 -d > /tmp/cert.p12
           printf '%s\n' "$PROFILE_B64" | openssl base64 -d > /tmp/profile.mobileprovision
+          # Ensure the Apple WWDR intermediate certificate is present (GitHub macOS
+          # runners usually ship it; self-heal by downloading if missing). The p12
+          # contains only the leaf certificate, so the chain needs the intermediate.
+          if ! security find-certificate -c "Apple Worldwide Developer Relations" /Library/Keychains/System.keychain >/dev/null 2>&1; then
+            echo "▶ WWDR intermediate missing — fetching AppleWWDRCAG3.cer"
+            curl -sSL -o /tmp/wwdr.cer "https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer"
+            sudo security import /tmp/wwdr.cer -k /Library/Keychains/System.keychain
+          else
+            echo "▶ WWDR intermediate already present ✓"
+          fi
           security create-keychain -p actions build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p actions build.keychain
