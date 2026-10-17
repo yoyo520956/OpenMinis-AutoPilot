@@ -7017,6 +7017,15 @@ struct AutoPilotToggleButton: View {
 
     private var enabled: Bool { ap.isEnabled(for: sessionId) }
 
+    /// 审查状态徽章色：绿=上轮审查通过 / 红=未通过 / 默认=未审查。
+    private var badgeTint: Color {
+        switch ap.lastReviewPassed {
+        case .some(true): return .green
+        case .some(false): return .red
+        case .none: return ChatColors.sendButton
+        }
+    }
+
     var body: some View {
         Button {
             ap.setEnabled(!enabled, sessionId: sessionId)
@@ -7037,7 +7046,7 @@ struct AutoPilotToggleButton: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 1)
-                        .background(Capsule().fill(ChatColors.sendButton))
+                        .background(Capsule().fill(badgeTint))
                         .offset(x: 4, y: -3)
                 }
             }

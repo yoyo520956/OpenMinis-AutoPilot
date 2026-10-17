@@ -2506,11 +2506,14 @@ final class AIChatViewModel: ObservableObject, SpeechControlling {
     /// 与 memoryStatusFragment 相同的组装模式：在每个 assemble site 追加。
     private var autoPilotStatusFragment: String {
         guard AutoPilotManager.shared.isEnabled(for: sessionId) else { return "" }
-        return "\n\nAutoPilot status: ENABLED for this session. "
-            + "You are in FULL AUTO mode: work autonomously until the task is complete — "
-            + "do not ask the user for confirmation, do not stop mid-task, retry failures yourself, "
-            + "and verify results with tools. When everything is done, end your final reply with "
-            + "a line containing exactly \(AutoPilotManager.doneToken). "
+        return "\n\nAutoPilot status: ENABLED (v2 worker+reviewer closed loop). "
+            + "You are the WORKER in FULL AUTO mode. On your first round, output a verifiable requirement checklist as ONE line: "
+            + "\(AutoPilotManager.checklistOpen)[{\"item\":\"...\",\"how_to_verify\":\"...\"}]\(AutoPilotManager.markerClose) "
+            + "then work through it autonomously — do not ask the user for confirmation, do not stop mid-task, retry failures yourself, "
+            + "and verify results with tools (attach real evidence: command outputs, file contents, build/test results — claims without evidence are treated as not done). "
+            + "An independent reviewer session checks every round against the checklist; failures come back with fix instructions "
+            + "(up to \(AutoPilotManager.maxFailStreak) consecutive reworks, then the user is asked to decide). "
+            + "When everything is done and verified, end your final reply with a line containing exactly \(AutoPilotManager.doneToken). "
             + "Only if you are truly blocked pending user input (secrets, destructive choices), "
             + "end with a line containing \(AutoPilotManager.blockedToken) plus one line explaining why."
     }
