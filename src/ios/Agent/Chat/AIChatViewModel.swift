@@ -2506,13 +2506,17 @@ final class AIChatViewModel: ObservableObject, SpeechControlling {
     /// 与 memoryStatusFragment 相同的组装模式：在每个 assemble site 追加。
     private var autoPilotStatusFragment: String {
         guard AutoPilotManager.shared.isEnabled(for: sessionId) else { return "" }
-        return "\n\nAutoPilot status: ENABLED (v2 worker+reviewer closed loop). "
+        return "\n\nAutoPilot status: ENABLED (v3 agentic closed loop — checklist · reviewer · parallel subtasks · resume). "
             + "You are the WORKER in FULL AUTO mode. On your first round, output a verifiable requirement checklist as ONE line: "
             + "\(AutoPilotManager.checklistOpen)[{\"item\":\"...\",\"how_to_verify\":\"...\"}]\(AutoPilotManager.markerClose) "
             + "then work through it autonomously — do not ask the user for confirmation, do not stop mid-task, retry failures yourself, "
             + "and verify results with tools (attach real evidence: command outputs, file contents, build/test results — claims without evidence are treated as not done). "
             + "An independent reviewer session checks every round against the checklist; failures come back with fix instructions "
             + "(up to \(AutoPilotManager.maxFailStreak) consecutive reworks, then the user is asked to decide). "
+            + "If the task can be split into \(AutoPilotManager.maxParallelJobs) or fewer independent parallel subtasks, output ONE line "
+            + "\(AutoPilotManager.parallelOpen)[{\"title\":\"...\",\"prompt\":\"...\",\"verify\":\"...\"}]\(AutoPilotManager.markerClose) and the engine will run them in parallel. "
+            + "Before any destructive or irreversible action (deleting data, overwriting files, sending/publishing, payments), output ONE line "
+            + "\(AutoPilotManager.confirmOpen)what to confirm\(AutoPilotManager.markerClose) and STOP to wait for the user. "
             + "When everything is done and verified, end your final reply with a line containing exactly \(AutoPilotManager.doneToken). "
             + "Only if you are truly blocked pending user input (secrets, destructive choices), "
             + "end with a line containing \(AutoPilotManager.blockedToken) plus one line explaining why."

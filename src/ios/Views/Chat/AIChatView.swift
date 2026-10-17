@@ -3322,6 +3322,7 @@ struct AIChatView: View {
             attachmentMenuButton
             slashMenuButton
             AutoPilotToggleButton(sessionId: vm.sessionId)
+            AutoCompactToggleButton(vm: vm)
             if vm.editingMessageIndex != nil { editExitButton }
             Spacer()
             // Mutually exclusive with editExitButton: while editing a past
@@ -3341,7 +3342,7 @@ struct AIChatView: View {
     /// leading buttons, the 34pt mic and the 34pt send button, plus the four
     /// 12pt HStack gaps between them. Everything left over is what the
     /// read-aloud capsule may use.
-    private static let readAloudRowFixedWidth: CGFloat = 34 * 5 + 12 * 5
+    private static let readAloudRowFixedWidth: CGFloat = 34 * 6 + 12 * 6
 
     /// Free width below which the toggle drops its text and becomes icon-only.
     ///
@@ -7011,6 +7012,33 @@ final class ComposerActionChannel {
 
 /// [AutoPilot] 输入条上的全自动模式开关。
 /// 独立订阅 AutoPilotManager.shared（只局部刷新）；sessionId 由父视图按会话传入。
+/// 自动压缩上下文模式按钮 — 位置与「全自动」按钮同区域并排，样式对齐。
+/// 开关即 AIChatViewModel.autoCompactEnabled：上下文接近容量时自动压缩
+/// （UserDefaults "autoCompactOnThreshold" 全局持久化，与设置联动）。
+struct AutoCompactToggleButton: View {
+    @ObservedObject var vm: AIChatViewModel
+
+    private var enabled: Bool { vm.autoCompactEnabled }
+
+    var body: some View {
+        Button {
+            vm.autoCompactEnabled.toggle()
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            Image(systemName: "arrow.down.right.and.arrow.up.left")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(enabled ? Color.white : ChatColors.secondaryText)
+                .frame(width: 34, height: 34)
+                .background(enabled ? ChatColors.sendButton : ChatColors.inputIconBg)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(enabled ? ChatColors.sendButton : ChatColors.inputIconBorder, lineWidth: 0.5))
+                .accessibilityLabel(Text(enabled ? "关闭自动压缩上下文" : "开启自动压缩上下文"))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+
 struct AutoPilotToggleButton: View {
     let sessionId: String?
     @ObservedObject private var ap = AutoPilotManager.shared
@@ -7052,5 +7080,6 @@ struct AutoPilotToggleButton: View {
             }
         }
         .buttonStyle(.plain)
+        .onAppear { ap.recoverIfNeeded(sessionId: sessionId) }
     }
 }
