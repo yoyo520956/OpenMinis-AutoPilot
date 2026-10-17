@@ -64,7 +64,7 @@ final class AutoPilotManager: ObservableObject {
     @Published private(set) var failStreak = 0
 
     private(set) var activeSessionId: String?
-    private(set) var reviewerSessionId: String?
+    @Published private(set) var reviewerSessionId: String?
 
     // MARK: - Marker protocol
 
@@ -88,7 +88,7 @@ final class AutoPilotManager: ObservableObject {
     // MARK: - Internal state
 
     private weak var workerVMRef: AIChatViewModel?
-    private var reviewerVM: AIChatViewModel?
+    @Published private(set) var reviewerVM: AIChatViewModel?
     private var checklistJSON: String?
     private var goalSummary: String?
     private var lastWorkerOutput: String?
@@ -104,8 +104,8 @@ final class AutoPilotManager: ObservableObject {
     private var subtaskTitles: [String: String] = [:]
     private var parallelUsed = 0
 
-    // v3: tracing
-    private var trace: [TraceEvent] = []
+    // v3: tracing（v0.4: 公开给审查员界面展示）
+    @Published private(set) var trace: [TraceEvent] = []
 
     // v3: guardrails — destructive-command tripwire patterns (false positives are acceptable; stopping is safe)
     static let dangerPatterns: [String] = [
@@ -220,7 +220,7 @@ final class AutoPilotManager: ObservableObject {
     // MARK: - Worker path
 
     private func handleWorkerLoopEnd(_ vm: AIChatViewModel) {
-        let tail = Self.recentText(vm: vm)
+        let tail = Self.normalizeMarkers(Self.recentText(vm: vm))
 
         // ① v3 CONFIRM protocol: destructive action needs the user → stop immediately.
         if tail.contains(Self.confirmOpen) {
@@ -336,7 +336,7 @@ final class AutoPilotManager: ObservableObject {
 
     private func handleReviewerLoopEnd(_ vm: AIChatViewModel) {
         guard phase == .reviewing else { return }
-        let tail = Self.recentText(vm: vm)
+        let tail = Self.normalizeMarkers(Self.recentText(vm: vm))
 
         guard let verdict = Self.parseReviewVerdict(tail) else {
             reviewFormatRetries += 1
@@ -784,6 +784,17 @@ final class AutoPilotManager: ObservableObject {
     }
 
     // MARK: - Parsing tools
+
+    /// v0.4 marker robustness: models sometimes emit different square glyphs
+    /// (■ ▣ ◆ …) instead of the canonical ▣. Normalize so token detection and
+    /// verdict parsing survive glyph drift.
+    static func normalizeMarkers(_ text: String) -> String {
+        var t = text
+        for glyph in ["■", "□", "◼", "◻", "▪", "▫", "◆", "◇", "◈", "⬛", "⬜", "▢", "◾", "◽"] {
+            t = t.replacingOccurrences(of: glyph, with: "▣")
+        }
+        return t
+    }
 
     /// Extract the content after the first occurrence of `open` up to the next `▣`.
     static func extractMarker(in text: String, open: String) -> String? {

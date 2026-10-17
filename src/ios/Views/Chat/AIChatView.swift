@@ -325,6 +325,7 @@ struct AIChatView: View {
     // like every other tool; this sheet target only serves the notification-
     // tap / debug-RPC `openHelperSheet` route.
     @State private var helperSheetTarget: HelperSheetTarget?
+    @State private var autoPilotReviewSheet = false
     // [T-p3-agent-callback-cell] Detail sheet for a tapped agent callback cell.
     @State private var agentCallbackDetail: AgentCallbackDetailTarget?
     @State private var showFileBrowser = false
@@ -631,6 +632,9 @@ struct AIChatView: View {
                             HelperTranscriptPage(target: target)
                                 .helperTranscriptSheetStyle()
                         }
+                        .sheet(isPresented: $autoPilotReviewSheet) {
+                            AutoPilotReviewSheet()
+                        }
                         .sheet(item: $agentCallbackDetail) { target in
                             // [T-agent-result-display] Same frame as any other
                             // tool result (nav bar + bottom status bar), with
@@ -674,6 +678,11 @@ struct AIChatView: View {
                 )
                 .overlay(alignment: .bottomTrailing) {
                     floatingSpeechButton
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    AutoPilotOrbView(sessionId: vm.sessionId) { autoPilotReviewSheet = true }
+                        .padding(.trailing, 14)
+                        .padding(.bottom, inputBarHeight + 10)
                 }
                 .overlay {
                     // Session-loading indicator, two flavors by scenario:
@@ -7081,5 +7090,294 @@ struct AutoPilotToggleButton: View {
         }
         .buttonStyle(.plain)
         .onAppear { ap.recoverIfNeeded(sessionId: sessionId) }
+    }
+}
+
+
+// MARK: - AutoPilot v0.4: 审查员悬浮球与审查界面
+
+/// 全自动模式悬浮球：彩色旋转圆环，点击打开审查员界面。
+/// 仅在当前会话开启全自动时显示；审查进行中（eye.fill）视觉强化。
+struct AutoPilotOrbView: View {
+    @ObservedObject private var ap = AutoPilotManager.shared
+    let sessionId: String?
+    let onTap: () -> Void
+
+    @State private var spinning = false
+
+    private var isOn: Bool { ap.isEnabled(for: sessionId) }
+    private var reviewing: Bool { ap.phase == .reviewing }
+
+    var body: some View {
+        if isOn {
+            Button(action: onTap) {
+                ZStack {
+                    Circle()
+                        .strokeBorder(
+                            AngularGradient(
+                                gradient: Gradient(colors: [
+                                    .red, .orange, .yellow, .green, .cyan, .blue, .purple, .red,
+                                ]),
+                                center: .center
+                            ),
+                            lineWidth: 3.2
+                        )
+                        .rotationEffect(.degrees(spinning ? 360 : 0))
+                        .animation(
+                            .linear(duration: 3.0).repeatForever(autoreverses: false),
+                            value: spinning
+                        )
+                    Circle()
+                        .fill(Color.black.opacity(0.82))
+                        .padding(4.5)
+                    Image(systemName: reviewing ? "eye.fill" : "eye")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 50, height: 50)
+                .shadow(color: reviewing ? Color.purple.opacity(0.65) : Color.black.opacity(0.25), radius: reviewing ? 12 : 6)
+                .contentShape(Circle())
+                .accessibilityLabel(Text("查看审查员"))
+            }
+            .buttonStyle(.plain)
+            .onAppear { spinning = true }
+        }
+    }
+}
+
+/// 审查员界面：状态条（阶段/轮数/返工）+ 运行轨迹 + 审查会话（可交流，用户消息=最高优先级）。
+/// 通过 ViewModelCache 绑定当前审查员子会话（与引擎共享同一 VM 实例）。
+struct AutoPilotReviewSheet: View {
+    @ObservedObject private var ap = AutoPilotManager.shared
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var vm: AIChatViewModel?
+    @State private var showTrace = false
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                statusStrip
+                if showTrace {
+                    tracePanel
+                    Divider()
+                }
+                if let vm {
+                    ReviewTranscriptView(vm: vm)
+                } else if ap.reviewerSessionId != nil {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .task { await loadVM() }
+                } else {
+                    notStartedHint
+                }
+            }
+            .navigationTitle("审查员")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+    }
+
+    // MARK: 状态条
+
+    private var statusStrip: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(phaseColor)
+                .frame(width: 8, height: 8)
+            Text(phaseLabel)
+                .font(.system(size: 12, weight: .semibold))
+            Text("第 \(ap.round) 轮")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.secondary)
+            if ap.failStreak > 0 {
+                Text("返工 \(ap.failStreak)/\(AutoPilotManager.maxFailStreak)")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.red)
+            }
+            Spacer()
+            Button {
+                withAnimation(.easeInOut(duration: 0.15)) { showTrace.toggle() }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "list.bullet.rectangle")
+                    Text("轨迹")
+                }
+                .font(.system(size: 12))
+                .foregroundStyle(showTrace ? ChatColors.sendButton : Color.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(Color.secondary.opacity(0.08))
+    }
+
+    private var phaseLabel: String {
+        switch ap.phase {
+        case .planning: return "规划中"
+        case .executing: return "干活中"
+        case .reviewing: return "审查中"
+        case .correcting: return "返工中"
+        case .subtasks: return "并行子任务"
+        case .finalizing: return "收尾中"
+        default: return "待命"
+        }
+    }
+
+    private var phaseColor: Color {
+        switch ap.phase {
+        case .reviewing: return .purple
+        case .correcting: return .red
+        case .executing: return .green
+        case .subtasks: return .cyan
+        case .finalizing: return .orange
+        default: return .blue
+        }
+    }
+
+    // MARK: 运行轨迹面板
+
+    private var tracePanel: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 6) {
+                if ap.trace.isEmpty {
+                    Text("暂无轨迹记录")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.secondary)
+                        .padding(.vertical, 8)
+                } else {
+                    ForEach(Array(ap.trace.enumerated()), id: \.offset) { entry in
+                        HStack(alignment: .top, spacing: 8) {
+                            Text(entry.element.t, style: .time)
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundStyle(Color.secondary)
+                            Text("R\(entry.element.round)")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundStyle(Color.secondary)
+                            Text(entry.element.msg)
+                                .font(.system(size: 12))
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+        }
+        .frame(maxHeight: 170)
+        .background(Color.secondary.opacity(0.04))
+    }
+
+    private var notStartedHint: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "eye.slash")
+                .font(.system(size: 34))
+                .foregroundStyle(Color.secondary)
+            Text("审查员尚未启动")
+                .font(.system(size: 15, weight: .medium))
+            Text("全自动模式跑完第一轮后，审查员会话会出现在这里。\n你可以随时点开查看它的审查过程。")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func loadVM() async {
+        guard let rid = ap.reviewerSessionId else { return }
+        let (child, fresh) = ViewModelCache.shared.getOrCreate(for: rid, kind: .child)
+        if fresh || child.messages.isEmpty {
+            await child.loadSession()
+        }
+        vm = child
+    }
+}
+
+/// 审查员消息流 + 输入栏（发消息给审查员，可指挥它盯紧/纠正）。
+struct ReviewTranscriptView: View {
+    @ObservedObject var vm: AIChatViewModel
+    @State private var draft = ""
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 10) {
+                        ForEach(Array(vm.messages.enumerated()), id: \.offset) { entry in
+                            ReviewBubble(message: entry.element)
+                                .id(entry.offset)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                }
+                .onChange(of: vm.messages.count) { _ in
+                    guard let last = vm.messages.indices.last else { return }
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        proxy.scrollTo(last, anchor: .bottom)
+                    }
+                }
+            }
+            Divider()
+            HStack(alignment: .bottom, spacing: 8) {
+                TextField("对审查员说点什么…", text: $draft, axis: .vertical)
+                    .lineLimit(1 ... 4)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 14))
+                Button(action: send) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 29))
+                        .foregroundStyle(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.secondary : ChatColors.sendButton)
+                }
+                .buttonStyle(.plain)
+                .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+        }
+    }
+
+    private func send() {
+        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        draft = ""
+        _ = vm.submitProgrammaticPrompt(text, origin: .autopilot, silent: false)
+    }
+}
+
+/// 单条审查员消息气泡（用户/注入的长指令折叠显示）。
+struct ReviewBubble: View {
+    let message: ChatMessage
+
+    var body: some View {
+        let isUser = message.role == .user
+        HStack {
+            if isUser { Spacer(minLength: 36) }
+            Text(displayText)
+                .font(.system(size: 13))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(isUser ? Color.blue.opacity(0.14) : Color.secondary.opacity(0.12))
+                )
+            if !isUser { Spacer(minLength: 36) }
+        }
+    }
+
+    private var displayText: String {
+        let t = message.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        if t.isEmpty { return "（空消息）" }
+        if message.role == .user && t.count > 420 {
+            return String(t.prefix(420)) + "\n…（长指令已折叠）"
+        }
+        return t
     }
 }
